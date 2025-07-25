@@ -1,0 +1,3630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Learning</title>
+    <style>
+        /* Modern Dark Theme with Rich Colors */
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --accent: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+            --rich-purple: #8b5cf6;
+            --rich-blue: #3b82f6;
+            --rich-emerald: #10b981;
+            --rich-orange: #f59e0b;
+            --rich-rose: #f43f5e;
+            --rich-indigo: #6366f1;
+            --black-bg: #000000;
+            --dark-gray: #111111;
+            --darker-gray: #1a1a1a;
+            --medium-gray: #2a2a2a;
+            --light-gray: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --shadow-rich: 0 4px 20px rgba(139, 92, 246, 0.2);
+            --shadow-rich-strong: 0 8px 30px rgba(139, 92, 246, 0.4);
+            --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.8);
+            --shadow-dark-lg: 0 20px 60px rgba(0, 0, 0, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Header & Navigation */
+        .header {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-dark);
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .nav-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 1rem clamp(1rem, 4vw, 2rem);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.3));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: clamp(1rem, 3vw, 2rem);
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-links a:hover::before {
+            left: 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            border-color: var(--rich-purple);
+            box-shadow: var(--shadow-rich);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: clamp(2rem, 8vw, 4rem) clamp(1rem, 4vw, 2rem);
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(ellipse, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .stat-card {
+            background: var(--dark-gray);
+            backdrop-filter: blur(15px);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            border-radius: 16px;
+            border: 1px solid var(--medium-gray);
+            box-shadow: var(--shadow-rich);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-rich-strong);
+            border-color: var(--rich-purple);
+        }
+
+        .stat-number {
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: clamp(1rem, 4vw, 2rem);
+            background: var(--dark-gray);
+            border-radius: 24px 24px 0 0;
+            box-shadow: var(--shadow-dark-lg);
+            margin-top: -2rem;
+            position: relative;
+            z-index: 10;
+            border: 1px solid var(--medium-gray);
+        }
+
+        /* Progress Dashboard */
+        .progress-dashboard {
+            background: var(--darker-gray);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            border-radius: 16px;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-dark);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .progress-header h2 {
+            color: var(--text-primary);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            background: var(--secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-bar-container {
+            background: var(--black-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--medium-gray);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Day Cards */
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
+            margin-bottom: 3rem;
+        }
+
+        .day-card {
+            background: var(--darker-gray);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: var(--shadow-dark);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--medium-gray);
+            position: relative;
+        }
+
+        .day-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .day-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .day-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-rich-strong);
+            border-color: var(--rich-purple);
+        }
+
+        .day-header {
+            background: var(--primary);
+            color: var(--text-primary);
+            padding: clamp(1rem, 3vw, 1.5rem);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .day-header:hover::after {
+            left: 100%;
+        }
+
+        .day-title {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .day-subtitle {
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        .toggle-icon {
+            background: var(--black-bg);
+            border: 2px solid var(--rich-purple);
+            color: var(--rich-purple);
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            width: clamp(2.5rem, 6vw, 3rem);
+            height: clamp(2.5rem, 6vw, 3rem);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toggle-icon:hover {
+            background: var(--rich-purple);
+            color: var(--text-primary);
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: var(--shadow-rich);
+        }
+
+        .day-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: var(--dark-gray);
+        }
+
+        .day-content.open {
+            max-height: 5000px;
+        }
+
+        .day-inner {
+            padding: clamp(1rem, 4vw, 2rem);
+        }
+
+        /* Topics & Subtopics */
+        .topic-section {
+            margin-bottom: 2rem;
+        }
+
+        .topic-title {
+            font-size: clamp(1.125rem, 3vw, 1.25rem);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .topic-title::before {
+            content: "🎯";
+            font-size: 1rem;
+        }
+
+        .subtopics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .subtopic-item {
+            background: var(--darker-gray);
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--rich-emerald);
+            box-shadow: var(--shadow-dark);
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            border-right: 1px solid var(--medium-gray);
+            border-top: 1px solid var(--medium-gray);
+            border-bottom: 1px solid var(--medium-gray);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subtopic-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--rich-emerald), var(--rich-blue));
+            transition: width 0.3s ease;
+            opacity: 0.1;
+        }
+
+        .subtopic-item:hover::before {
+            width: 100%;
+        }
+
+        .subtopic-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-rich);
+            border-left-color: var(--rich-blue);
+            border-right-color: var(--rich-emerald);
+        }
+
+        /* Code Snippets */
+        .code-section {
+            margin: 1.5rem 0;
+        }
+
+        .code-header {
+            background: var(--black-bg);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--medium-gray);
+            border-bottom: none;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .copy-btn {
+            background: var(--rich-purple);
+            border: none;
+            color: var(--text-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: var(--rich-blue);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-rich);
+        }
+
+        pre {
+            background: #0a0a0a;
+            color: #e5e5e5;
+            padding: 1.5rem;
+            border-radius: 0 0 8px 8px;
+            overflow-x: auto;
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            line-height: 1.5;
+            border: 1px solid var(--medium-gray);
+            border-top: none;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        pre::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: var(--black-bg);
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: var(--rich-purple);
+            border-radius: 4px;
+        }
+
+        /* Resources */
+        .resources-section {
+            background: var(--darker-gray);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-dark);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .resources-title {
+            font-size: clamp(1rem, 3vw, 1.125rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .resources-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--medium-gray);
+            background: var(--black-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .resource-item:hover::before {
+            left: 100%;
+        }
+
+        .resource-item:hover {
+            background: var(--darker-gray);
+            transform: translateX(8px);
+            border-color: var(--rich-purple);
+            box-shadow: var(--shadow-rich);
+        }
+
+        .resource-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .resource-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            flex: 1;
+            transition: color 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Learning Path */
+        .learning-path {
+            background: var(--darker-gray);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            border-radius: 20px;
+            margin: 3rem 0;
+            border: 1px solid var(--rich-purple);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .learning-path h2 {
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .path-timeline {
+            position: relative;
+            padding-left: clamp(2rem, 5vw, 3rem);
+        }
+
+        .path-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+        }
+
+        .path-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: var(--black-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-dark);
+            border: 1px solid var(--medium-gray);
+            transition: all 0.3s ease;
+        }
+
+        .path-item::before {
+            content: '';
+            position: absolute;
+            left: -2.25rem;
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: var(--black-bg);
+            border: 3px solid var(--rich-cyan);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+        }
+
+        .path-item:hover {
+            transform: translateX(10px);
+            border-color: var(--rich-green);
+            box-shadow: var(--shadow-rich);
+        }
+
+        .path-item h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            background: var(--secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .path-item p {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: clamp(1rem, 3vw, 1.5rem);
+            }
+            
+            .days-grid {
+                grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+            .hero p { font-size: clamp(0.9rem, 3vw, 1.25rem); }
+            .days-grid { 
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .nav-links { 
+                display: none; 
+            }
+            .container { 
+                padding: 1rem;
+                margin-top: -1rem;
+            }
+            .subtopics-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .day-header {
+                padding: 1rem;
+            }
+            .progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .path-timeline {
+                padding-left: 1.5rem;
+            }
+            .code-header {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.75rem;
+            }
+            pre {
+                font-size: 0.75rem;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 2rem 1rem;
+            }
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+            .stat-card {
+                padding: 1rem;
+            }
+            .nav-container {
+                padding: 0.75rem 1rem;
+            }
+            .toggle-icon {
+                width: 2rem;
+                height: 2rem;
+                font-size: 1rem;
+            }
+            .day-inner {
+                padding: 1rem;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .day-card {
+                border: 2px solid var(--neon-cyan);
+            }
+            
+            .subtopic-item {
+                border: 1px solid var(--neon-green);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .day-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: var(--rich-purple); }
+        .string { color: var(--rich-orange); }
+        .comment { color: var(--text-secondary); }
+        .function { color: var(--rich-cyan); }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">Flask</div>
+            <ul class="nav-links">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#roadmap">Roadmap</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#progress">Progress</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Beginner Wesbite to Learn Flask</h1>
+        <p>From absolute beginner to production-ready Flask</p>
+        <p>Made Especially for AB....</p>
+        
+        <div class="hero-stats">
+            <div class="stat-card">
+                <div class="stat-number">20</div>
+                <div>Days to Mastery</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">150+</div>
+                <div>Code Examples</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">50+</div>
+                <div>Resources</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">10</div>
+                <div>Real Projects</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Progress Dashboard -->
+        <section class="progress-dashboard" id="progress">
+            <div class="progress-header">
+                <h2>Your Learning Progress</h2>
+                <span id="progressPercent">0% Complete</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Path Timeline -->
+        <section class="learning-path">
+            <h2>Complete Learning Path</h2>
+            <div class="path-timeline">
+                <div class="path-item">
+                    <h3>Days 1-5: Flask Foundations</h3>
+                    <p>Environment setup, basic routing, templates, forms, and database integration</p>
+                </div>
+                <div class="path-item">
+                    <h3>Days 6-9: Core Application Patterns</h3>
+                    <p>User profiles, error handling, social features, and pagination</p>
+                </div>
+                <div class="path-item">
+                    <h3>Days 10-13: Advanced Features</h3>
+                    <p>Email, background tasks, internationalization, and search</p>
+                </div>
+                <div class="path-item">
+                    <h3>Days 14-16: APIs & Architecture</h3>
+                    <p>RESTful APIs, blueprints, testing, and modular design</p>
+                </div>
+                <div class="path-item">
+                    <h3>Days 17-20: Production & Deployment</h3>
+                    <p>Docker, CI/CD, Kubernetes, monitoring, and security</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Days Grid -->
+        <div class="days-grid" id="roadmap">
+            <!-- Day 1 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 1: Environment & Hello World</div>
+                        <div class="day-subtitle">Setup, Installation & First Flask App</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Python Virtual Environments</div>
+                                <div class="subtopic-item">Flask Installation & Dependencies</div>
+                                <div class="subtopic-item">Project Structure Setup</div>
+                                <div class="subtopic-item">Development Server Configuration</div>
+                                <div class="subtopic-item">Debug Mode & Hot Reloading</div>
+                                <div class="subtopic-item">Environment Variables</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Your First Flask Application</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, request
+
+<span class="comment"># Create Flask application instance</span>
+app = Flask(__name__)
+
+<span class="comment"># Configuration</span>
+app.config[<span class="string">'SECRET_KEY'</span>] = <span class="string">'your-secret-key-here'</span>
+app.config[<span class="string">'DEBUG'</span>] = <span class="keyword">True</span>
+
+<span class="comment"># Basic route</span>
+@app.route(<span class="string">'/'</span>)
+<span class="keyword">def</span> <span class="function">index</span>():
+    <span class="keyword">return</span> <span class="string">'Hello, Flask World!'</span>
+
+<span class="comment"># Route with parameters</span>
+@app.route(<span class="string">'/user/&lt;name&gt;'</span>)
+<span class="keyword">def</span> <span class="function">user_profile</span>(name):
+    <span class="keyword">return</span> f<span class="string">'Welcome, {name}!'</span>
+
+<span class="comment"># Multiple HTTP methods</span>
+@app.route(<span class="string">'/contact'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">contact</span>():
+    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:
+        <span class="keyword">return</span> <span class="string">'Message received!'</span>
+    <span class="keyword">return</span> <span class="string">'Contact Form'</span>
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    app.run(debug=<span class="keyword">True</span>, host=<span class="string">'0.0.0.0'</span>, port=5000)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>requirements.txt - Project Dependencies</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>Flask==3.0.0
+python-dotenv==1.0.0
+Werkzeug==3.0.1</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>.env - Environment Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>FLASK_APP=app.py
+FLASK_ENV=development
+FLASK_DEBUG=1
+SECRET_KEY=your-super-secret-key-change-this</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/quickstart/" class="resource-link" target="_blank">Flask Official Quickstart Guide</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=Z1RJmh_OqeA" class="resource-link" target="_blank">Flask Tutorial - FreeCodeCamp</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world" class="resource-link" target="_blank">Flask Mega-Tutorial Part 1</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">💻</div>
+                                    <a href="https://realpython.com/python-virtual-environments-a-primer/" class="resource-link" target="_blank">Python Virtual Environments Guide</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/installation/" class="resource-link" target="_blank">Flask Installation Documentation</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 2: Templates & Jinja2</div>
+                        <div class="day-subtitle">Dynamic HTML Generation & Template Inheritance</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Jinja2 Template Engine</div>
+                                <div class="subtopic-item">Template Inheritance & Blocks</div>
+                                <div class="subtopic-item">Variable Interpolation</div>
+                                <div class="subtopic-item">Control Structures (if, for, while)</div>
+                                <div class="subtopic-item">Template Filters & Functions</div>
+                                <div class="subtopic-item">Static Files Management</div>
+                                <div class="subtopic-item">URL Generation with url_for()</div>
+                                <div class="subtopic-item">Template Context Processors</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/base.html - Base Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;{% block title %}Flask App{% endblock %}&lt;/title&gt;
+    &lt;link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"&gt;
+    {% block head %}{% endblock %}
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav class="navbar"&gt;
+        &lt;div class="nav-container"&gt;
+            &lt;a href="{{ url_for('index') }}" class="nav-brand"&gt;Flask App&lt;/a&gt;
+            &lt;ul class="nav-menu"&gt;
+                &lt;li&gt;&lt;a href="{{ url_for('index') }}"&gt;Home&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="{{ url_for('about') }}"&gt;About&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="{{ url_for('contact') }}"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+
+    &lt;main class="main-content"&gt;
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                &lt;div class="flash-messages"&gt;
+                    {% for message in messages %}
+                        &lt;div class="alert alert-info"&gt;{{ message }}&lt;/div&gt;
+                    {% endfor %}
+                &lt;/div&gt;
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    &lt;/main&gt;
+
+    &lt;footer class="footer"&gt;
+        &lt;p&gt;&amp;copy; 2024 Flask App. All rights reserved.&lt;/p&gt;
+    &lt;/footer&gt;
+
+    &lt;script src="{{ url_for('static', filename='js/main.js') }}"&gt;&lt;/script&gt;
+    {% block scripts %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/index.html - Home Page Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>{% extends "base.html" %}
+
+{% block title %}Home - Flask App{% endblock %}
+
+{% block content %}
+&lt;div class="hero-section"&gt;
+    &lt;h1&gt;Welcome to Flask, {{ user.name or 'Guest' }}!&lt;/h1&gt;
+    &lt;p&gt;Today is {{ moment().format('MMMM Do YYYY') }}&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div class="features-grid"&gt;
+    {% for feature in features %}
+    &lt;div class="feature-card"&gt;
+        &lt;h3&gt;{{ feature.title }}&lt;/h3&gt;
+        &lt;p&gt;{{ feature.description }}&lt;/p&gt;
+        {% if feature.image %}
+            &lt;img src="{{ url_for('static', filename='images/' + feature.image) }}" 
+                 alt="{{ feature.title }}"&gt;
+        {% endif %}
+    &lt;/div&gt;
+    {% else %}
+    &lt;p&gt;No features available.&lt;/p&gt;
+    {% endfor %}
+&lt;/div&gt;
+
+&lt;div class="stats-section"&gt;
+    {% set user_count = users|length %}
+    {% if user_count &gt; 100 %}
+        &lt;p class="highlight"&gt;We have over {{ user_count }} users!&lt;/p&gt;
+    {% elif user_count &gt; 10 %}
+        &lt;p&gt;Growing community: {{ user_count }} members&lt;/p&gt;
+    {% else %}
+        &lt;p&gt;Join our small but growing community!&lt;/p&gt;
+    {% endif %}
+&lt;/div&gt;
+{% endblock %}
+
+{% block scripts %}
+&lt;script&gt;
+    console.log('Home page loaded');
+    // Add page-specific JavaScript here
+&lt;/script&gt;
+{% endblock %}</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Updated with Template Rendering</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, flash
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+app = Flask(__name__)
+app.config[<span class="string">'SECRET_KEY'</span>] = <span class="string">'your-secret-key'</span>
+
+<span class="comment"># Template context processor</span>
+@app.context_processor
+<span class="keyword">def</span> <span class="function">utility_processor</span>():
+    <span class="keyword">def</span> <span class="function">format_currency</span>(amount):
+        <span class="keyword">return</span> f<span class="string">"${amount:,.2f}"</span>
+    
+    <span class="keyword">return</span> dict(format_currency=format_currency)
+
+<span class="comment"># Template filter</span>
+@app.template_filter(<span class="string">'datetime'</span>)
+<span class="keyword">def</span> <span class="function">datetime_filter</span>(datetime_obj):
+    <span class="keyword">return</span> datetime_obj.strftime(<span class="string">'%Y-%m-%d %H:%M'</span>)
+
+@app.route(<span class="string">'/'</span>)
+<span class="keyword">def</span> <span class="function">index</span>():
+    features = [
+        {
+            <span class="string">'title'</span>: <span class="string">'Easy to Learn'</span>,
+            <span class="string">'description'</span>: <span class="string">'Flask is beginner-friendly'</span>,
+            <span class="string">'image'</span>: <span class="string">'learn.jpg'</span>
+        },
+        {
+            <span class="string">'title'</span>: <span class="string">'Flexible'</span>,
+            <span class="string">'description'</span>: <span class="string">'Build any type of web application'</span>,
+            <span class="string">'image'</span>: <span class="string">'flexible.jpg'</span>
+        }
+    ]
+    
+    users = [<span class="string">'Alice'</span>, <span class="string">'Bob'</span>, <span class="string">'Charlie'</span>]  <span class="comment"># Mock data</span>
+    
+    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, 
+                         features=features, 
+                         users=users,
+                         user={<span class="string">'name'</span>: <span class="string">'John'</span>})
+
+@app.route(<span class="string">'/about'</span>)
+<span class="keyword">def</span> <span class="function">about</span>():
+    flash(<span class="string">'Thanks for visiting our about page!'</span>)
+    <span class="keyword">return</span> render_template(<span class="string">'about.html'</span>)
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    app.run(debug=<span class="keyword">True</span>)</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/templating/" class="resource-link" target="_blank">Flask Templates Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎨</div>
+                                    <a href="https://jinja.palletsprojects.com/en/3.1.x/templates/" class="resource-link" target="_blank">Jinja2 Template Designer Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-templates" class="resource-link" target="_blank">Flask Mega-Tutorial Part 2: Templates</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=QnDWIZuWYW0" class="resource-link" target="_blank">Flask Templates Tutorial - Corey Schafer</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://realpython.com/primer-on-jinja-templating/" class="resource-link" target="_blank">Primer on Jinja Templating</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 3: Web Forms with Flask-WTF</div>
+                        <div class="day-subtitle">Form Handling, Validation & CSRF Protection</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask-WTF Extension</div>
+                                <div class="subtopic-item">Form Classes & Field Types</div>
+                                <div class="subtopic-item">Validation & Custom Validators</div>
+                                <div class="subtopic-item">CSRF Protection</div>
+                                <div class="subtopic-item">File Uploads</div>
+                                <div class="subtopic-item">Form Rendering in Templates</div>
+                                <div class="subtopic-item">Flash Messages</div>
+                                <div class="subtopic-item">Form Processing & Error Handling</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>forms.py - WTF Form Classes</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_wtf <span class="keyword">import</span> FlaskForm
+<span class="keyword">from</span> flask_wtf.file <span class="keyword">import</span> FileField, FileAllowed
+<span class="keyword">from</span> wtforms <span class="keyword">import</span> StringField, TextAreaField, PasswordField, \
+                         SelectField, BooleanField, SubmitField
+<span class="keyword">from</span> wtforms.validators <span class="keyword">import</span> DataRequired, Length, Email, \
+                              EqualTo, ValidationError
+<span class="keyword">import</span> re
+
+<span class="keyword">class</span> <span class="function">LoginForm</span>(FlaskForm):
+    username = StringField(<span class="string">'Username'</span>, 
+                          validators=[DataRequired(), Length(min=4, max=20)])
+    password = PasswordField(<span class="string">'Password'</span>, 
+                           validators=[DataRequired(), Length(min=8)])
+    remember_me = BooleanField(<span class="string">'Remember Me'</span>)
+    submit = SubmitField(<span class="string">'Sign In'</span>)
+
+<span class="keyword">class</span> <span class="function">RegistrationForm</span>(FlaskForm):
+    username = StringField(<span class="string">'Username'</span>, 
+                          validators=[DataRequired(), Length(min=4, max=20)])
+    email = StringField(<span class="string">'Email'</span>, 
+                       validators=[DataRequired(), Email()])
+    password = PasswordField(<span class="string">'Password'</span>, 
+                           validators=[DataRequired(), Length(min=8)])
+    password2 = PasswordField(<span class="string">'Repeat Password'</span>, 
+                            validators=[DataRequired(), 
+                                      EqualTo(<span class="string">'password'</span>)])
+    submit = SubmitField(<span class="string">'Register'</span>)
+    
+    <span class="keyword">def</span> <span class="function">validate_username</span>(self, username):
+        <span class="comment"># Custom validator for username</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> re.match(<span class="string">r'^[a-zA-Z0-9_]+$'</span>, username.data):
+            <span class="keyword">raise</span> ValidationError(
+                <span class="string">'Username must contain only letters, numbers, and underscores.'</span>)
+    
+    <span class="keyword">def</span> <span class="function">validate_password</span>(self, password):
+        <span class="comment"># Custom password strength validator</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> re.search(<span class="string">r'[A-Z]'</span>, password.data):
+            <span class="keyword">raise</span> ValidationError(
+                <span class="string">'Password must contain at least one uppercase letter.'</span>)
+        <span class="keyword">if</span> <span class="keyword">not</span> re.search(<span class="string">r'[0-9]'</span>, password.data):
+            <span class="keyword">raise</span> ValidationError(
+                <span class="string">'Password must contain at least one number.'</span>)
+
+<span class="keyword">class</span> <span class="function">ContactForm</span>(FlaskForm):
+    name = StringField(<span class="string">'Name'</span>, validators=[DataRequired(), Length(max=50)])
+    email = StringField(<span class="string">'Email'</span>, validators=[DataRequired(), Email()])
+    subject = SelectField(<span class="string">'Subject'</span>, 
+                         choices=[(<span class="string">'general'</span>, <span class="string">'General Inquiry'</span>),
+                                 (<span class="string">'support'</span>, <span class="string">'Technical Support'</span>),
+                                 (<span class="string">'business'</span>, <span class="string">'Business Inquiry'</span>)],
+                         validators=[DataRequired()])
+    message = TextAreaField(<span class="string">'Message'</span>, 
+                          validators=[DataRequired(), Length(min=10, max=500)])
+    attachment = FileField(<span class="string">'Attachment'</span>,
+                         validators=[FileAllowed([<span class="string">'jpg'</span>, <span class="string">'png'</span>, <span class="string">'pdf'</span>], 
+                                               <span class="string">'Images and PDFs only!'</span>)])
+    submit = SubmitField(<span class="string">'Send Message'</span>)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Form Handling Routes</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, flash, redirect, url_for, request
+<span class="keyword">from</span> forms <span class="keyword">import</span> LoginForm, RegistrationForm, ContactForm
+<span class="keyword">import</span> os
+
+app = Flask(__name__)
+app.config[<span class="string">'SECRET_KEY'</span>] = <span class="string">'your-secret-key-here'</span>
+app.config[<span class="string">'UPLOAD_FOLDER'</span>] = <span class="string">'uploads'</span>
+
+<span class="comment"># Create upload directory if it doesn't exist</span>
+os.makedirs(app.config[<span class="string">'UPLOAD_FOLDER'</span>], exist_ok=<span class="keyword">True</span>)
+
+@app.route(<span class="string">'/login'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">login</span>():
+    form = LoginForm()
+    
+    <span class="keyword">if</span> form.validate_on_submit():
+        <span class="comment"># Process login logic here</span>
+        username = form.username.data
+        password = form.password.data
+        remember = form.remember_me.data
+        
+        <span class="comment"># Simulate authentication (replace with real logic)</span>
+        <span class="keyword">if</span> username == <span class="string">'admin'</span> <span class="keyword">and</span> password == <span class="string">'Password123'</span>:
+            flash(f<span class="string">'Login successful! Welcome, {username}!'</span>, <span class="string">'success'</span>)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))
+        <span class="keyword">else</span>:
+            flash(<span class="string">'Invalid username or password.'</span>, <span class="string">'error'</span>)
+    
+    <span class="keyword">return</span> render_template(<span class="string">'login.html'</span>, form=form)
+
+@app.route(<span class="string">'/register'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">register</span>():
+    form = RegistrationForm()
+    
+    <span class="keyword">if</span> form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
+        
+        <span class="comment"># Process registration logic here</span>
+        flash(f<span class="string">'Registration successful for {username}!'</span>, <span class="string">'success'</span>)
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'login'</span>))
+    
+    <span class="keyword">return</span> render_template(<span class="string">'register.html'</span>, form=form)
+
+@app.route(<span class="string">'/contact'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">contact</span>():
+    form = ContactForm()
+    
+    <span class="keyword">if</span> form.validate_on_submit():
+        <span class="comment"># Handle file upload</span>
+        <span class="keyword">if</span> form.attachment.data:
+            filename = secure_filename(form.attachment.data.filename)
+            form.attachment.data.save(
+                os.path.join(app.config[<span class="string">'UPLOAD_FOLDER'</span>], filename))
+        
+        <span class="comment"># Process contact form</span>
+        flash(<span class="string">'Your message has been sent!'</span>, <span class="string">'success'</span>)
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'contact'</span>))
+    
+    <span class="keyword">return</span> render_template(<span class="string">'contact.html'</span>, form=form)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/login.html - Login Form Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>{% extends "base.html" %}
+
+{% block title %}Login - Flask App{% endblock %}
+
+{% block content %}
+&lt;div class="form-container"&gt;
+    &lt;h2&gt;Sign In&lt;/h2&gt;
+    
+    &lt;form method="POST"&gt;
+        {{ form.hidden_tag() }}
+        
+        &lt;div class="form-group"&gt;
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control") }}
+            {% if form.username.errors %}
+                &lt;div class="error-messages"&gt;
+                    {% for error in form.username.errors %}
+                        &lt;span class="error"&gt;{{ error }}&lt;/span&gt;
+                    {% endfor %}
+                &lt;/div&gt;
+            {% endif %}
+        &lt;/div&gt;
+        
+        &lt;div class="form-group"&gt;
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control") }}
+            {% if form.password.errors %}
+                &lt;div class="error-messages"&gt;
+                    {% for error in form.password.errors %}
+                        &lt;span class="error"&gt;{{ error }}&lt;/span&gt;
+                    {% endfor %}
+                &lt;/div&gt;
+            {% endif %}
+        &lt;/div&gt;
+        
+        &lt;div class="form-group checkbox-group"&gt;
+            {{ form.remember_me() }}
+            {{ form.remember_me.label() }}
+        &lt;/div&gt;
+        
+        &lt;div class="form-group"&gt;
+            {{ form.submit(class="btn btn-primary") }}
+        &lt;/div&gt;
+    &lt;/form&gt;
+    
+    &lt;p&gt;Don't have an account? &lt;a href="{{ url_for('register') }}"&gt;Register here&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+{% endblock %}</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask-wtf.readthedocs.io/en/1.0.x/" class="resource-link" target="_blank">Flask-WTF Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://wtforms.readthedocs.io/en/3.0.x/" class="resource-link" target="_blank">WTForms Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=UIJKdCIEXUQ" class="resource-link" target="_blank">Flask Forms Tutorial - Tech with Tim</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iii-web-forms" class="resource-link" target="_blank">Flask Mega-Tutorial Part 3: Web Forms</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔒</div>
+                                    <a href="https://flask-wtf.readthedocs.io/en/1.0.x/csrf.html" class="resource-link" target="_blank">CSRF Protection Guide</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 4 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 4: Database & SQLAlchemy</div>
+                        <div class="day-subtitle">ORM, Models, Migrations & Database Operations</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask-SQLAlchemy Setup</div>
+                                <div class="subtopic-item">Database Models & Relationships</div>
+                                <div class="subtopic-item">Flask-Migrate for Schema Changes</div>
+                                <div class="subtopic-item">CRUD Operations</div>
+                                <div class="subtopic-item">Query API & Filtering</div>
+                                <div class="subtopic-item">Database Transactions</div>
+                                <div class="subtopic-item">Pagination & Performance</div>
+                                <div class="subtopic-item">Database Configuration</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>models.py - Database Models</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+<span class="keyword">from</span> werkzeug.security <span class="keyword">import</span> generate_password_hash, check_password_hash
+
+db = SQLAlchemy()
+
+<span class="comment"># Association table for many-to-many relationship</span>
+followers = db.Table(<span class="string">'followers'</span>,
+    db.Column(<span class="string">'follower_id'</span>, db.Integer, db.ForeignKey(<span class="string">'user.id'</span>)),
+    db.Column(<span class="string">'followed_id'</span>, db.Integer, db.ForeignKey(<span class="string">'user.id'</span>))
+)
+
+<span class="keyword">class</span> <span class="function">User</span>(db.Model):
+    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)
+    username = db.Column(db.String(64), index=<span class="keyword">True</span>, unique=<span class="keyword">True</span>)
+    email = db.Column(db.String(120), index=<span class="keyword">True</span>, unique=<span class="keyword">True</span>)
+    password_hash = db.Column(db.String(128))
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    <span class="comment"># Relationship to posts</span>
+    posts = db.relationship(<span class="string">'Post'</span>, backref=<span class="string">'author'</span>, lazy=<span class="string">'dynamic'</span>,
+                          cascade=<span class="string">'all, delete-orphan'</span>)
+    
+    <span class="comment"># Self-referential many-to-many relationship</span>
+    followed = db.relationship(
+        <span class="string">'User'</span>, secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref(<span class="string">'followers'</span>, lazy=<span class="string">'dynamic'</span>), lazy=<span class="string">'dynamic'</span>)
+
+    <span class="keyword">def</span> <span class="function">set_password</span>(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    <span class="keyword">def</span> <span class="function">check_password</span>(self, password):
+        <span class="keyword">return</span> check_password_hash(self.password_hash, password)
+    
+    <span class="keyword">def</span> <span class="function">follow</span>(self, user):
+        <span class="keyword">if</span> <span class="keyword">not</span> self.is_following(user):
+            self.followed.append(user)
+    
+    <span class="keyword">def</span> <span class="function">unfollow</span>(self, user):
+        <span class="keyword">if</span> self.is_following(user):
+            self.followed.remove(user)
+    
+    <span class="keyword">def</span> <span class="function">is_following</span>(self, user):
+        <span class="keyword">return</span> self.followed.filter(
+            followers.c.followed_id == user.id).count() &gt; 0
+    
+    <span class="keyword">def</span> <span class="function">followed_posts</span>(self):
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        <span class="keyword">return</span> followed.union(own).order_by(Post.timestamp.desc())
+    
+    <span class="keyword">def</span> <span class="function">__repr__</span>(self):
+        <span class="keyword">return</span> f<span class="string">'&lt;User {self.username}&gt;'</span>
+
+<span class="keyword">class</span> <span class="function">Post</span>(db.Model):
+    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=<span class="keyword">True</span>, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey(<span class="string">'user.id'</span>))
+    
+    <span class="comment"># Relationship to comments</span>
+    comments = db.relationship(<span class="string">'Comment'</span>, backref=<span class="string">'post'</span>, lazy=<span class="string">'dynamic'</span>,
+                             cascade=<span class="string">'all, delete-orphan'</span>)
+    
+    <span class="keyword">def</span> <span class="function">__repr__</span>(self):
+        <span class="keyword">return</span> f<span class="string">'&lt;Post {self.body}&gt;'</span>
+
+<span class="keyword">class</span> <span class="function">Comment</span>(db.Model):
+    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=<span class="keyword">True</span>, default=datetime.utcnow)
+    disabled = db.Column(db.Boolean, default=<span class="keyword">False</span>)
+    author_id = db.Column(db.Integer, db.ForeignKey(<span class="string">'user.id'</span>))
+    post_id = db.Column(db.Integer, db.ForeignKey(<span class="string">'post.id'</span>))
+    
+    <span class="comment"># Back reference to user</span>
+    author = db.relationship(<span class="string">'User'</span>, backref=<span class="string">'comments'</span>)
+
+<span class="keyword">class</span> <span class="function">Category</span>(db.Model):
+    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)
+    name = db.Column(db.String(50), unique=<span class="keyword">True</span>)
+    description = db.Column(db.Text)
+    
+    <span class="comment"># One-to-many relationship with posts</span>
+    posts = db.relationship(<span class="string">'Post'</span>, backref=<span class="string">'category'</span>, lazy=<span class="string">'dynamic'</span>)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Database Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, request, redirect, url_for, flash
+<span class="keyword">from</span> flask_migrate <span class="keyword">import</span> Migrate
+<span class="keyword">from</span> models <span class="keyword">import</span> db, User, Post, Comment
+<span class="keyword">import</span> os
+
+app = Flask(__name__)
+
+<span class="comment"># Database configuration</span>
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config[<span class="string">'SQLALCHEMY_DATABASE_URI'</span>] = \
+    os.environ.get(<span class="string">'DATABASE_URL'</span>) <span class="keyword">or</span> \
+    <span class="string">'sqlite:///'</span> + os.path.join(basedir, <span class="string">'app.db'</span>)
+app.config[<span class="string">'SQLALCHEMY_TRACK_MODIFICATIONS'</span>] = <span class="keyword">False</span>
+app.config[<span class="string">'SECRET_KEY'</span>] = os.environ.get(<span class="string">'SECRET_KEY'</span>) <span class="keyword">or</span> <span class="string">'dev-secret-key'</span>
+
+<span class="comment"># Initialize extensions</span>
+db.init_app(app)
+migrate = Migrate(app, db)
+
+<span class="comment"># Database utility functions</span>
+<span class="keyword">def</span> <span class="function">create_sample_data</span>():
+    <span class="string">"""Create sample data for testing"""</span>
+    <span class="comment"># Create users</span>
+    admin = User(username=<span class="string">'admin'</span>, email=<span class="string">'admin@example.com'</span>)
+    admin.set_password(<span class="string">'password123'</span>)
+    
+    john = User(username=<span class="string">'john'</span>, email=<span class="string">'john@example.com'</span>)
+    john.set_password(<span class="string">'password123'</span>)
+    
+    db.session.add_all([admin, john])
+    db.session.commit()
+    
+    <span class="comment"># Create posts</span>
+    post1 = Post(body=<span class="string">'Hello, World!'</span>, author=admin)
+    post2 = Post(body=<span class="string">'Learning Flask!'</span>, author=john)
+    
+    db.session.add_all([post1, post2])
+    db.session.commit()
+
+@app.route(<span class="string">'/users'</span>)
+<span class="keyword">def</span> <span class="function">users</span>():
+    <span class="comment"># Query all users with pagination</span>
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    users = User.query.paginate(
+        page=page, per_page=5, error_out=<span class="keyword">False</span>)
+    
+    <span class="keyword">return</span> render_template(<span class="string">'users.html'</span>, users=users)
+
+@app.route(<span class="string">'/user/&lt;username&gt;'</span>)
+<span class="keyword">def</span> <span class="function">user_profile</span>(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    
+    <span class="keyword">return</span> render_template(<span class="string">'user_profile.html'</span>, user=user, posts=posts)
+
+@app.route(<span class="string">'/create_post'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">create_post</span>():
+    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:
+        body = request.form[<span class="string">'body'</span>]
+        <span class="comment"># Assuming we have current_user (will be covered in authentication)</span>
+        user = User.query.first()  <span class="comment"># Temporary: get first user</span>
+        
+        post = Post(body=body, author=user)
+        db.session.add(post)
+        db.session.commit()
+        
+        flash(<span class="string">'Post created successfully!'</span>)
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))
+    
+    <span class="keyword">return</span> render_template(<span class="string">'create_post.html'</span>)
+
+@app.route(<span class="string">'/search'</span>)
+<span class="keyword">def</span> <span class="function">search</span>():
+    query = request.args.get(<span class="string">'q'</span>, <span class="string">''</span>)
+    
+    <span class="keyword">if</span> query:
+        <span class="comment"># Search users and posts</span>
+        users = User.query.filter(
+            User.username.contains(query)).all()
+        posts = Post.query.filter(
+            Post.body.contains(query)).all()
+    <span class="keyword">else</span>:
+        users, posts = [], []
+    
+    <span class="keyword">return</span> render_template(<span class="string">'search.html'</span>, 
+                         users=users, posts=posts, query=query)
+
+@app.cli.command()
+<span class="keyword">def</span> <span class="function">init_db</span>():
+    <span class="string">"""Initialize the database."""</span>
+    db.create_all()
+    create_sample_data()
+    print(<span class="string">'Database initialized!'</span>)
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    <span class="keyword">with</span> app.app_context():
+        db.create_all()
+    app.run(debug=<span class="keyword">True</span>)</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/" class="resource-link" target="_blank">Flask-SQLAlchemy Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔄</div>
+                                    <a href="https://flask-migrate.readthedocs.io/en/latest/" class="resource-link" target="_blank">Flask-Migrate Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database" class="resource-link" target="_blank">Flask Mega-Tutorial Part 4: Database</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=cYWiDiIUxQc" class="resource-link" target="_blank">SQLAlchemy Tutorial - Corey Schafer</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📊</div>
+                                    <a href="https://docs.sqlalchemy.org/en/20/orm/quickstart.html" class="resource-link" target="_blank">SQLAlchemy ORM Quickstart</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 5 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 5: User Authentication</div>
+                        <div class="day-subtitle">Login, Sessions, Password Hashing & Security</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask-Login Extension</div>
+                                <div class="subtopic-item">User Session Management</div>
+                                <div class="subtopic-item">Password Hashing with Werkzeug</div>
+                                <div class="subtopic-item">Login Required Decorator</div>
+                                <div class="subtopic-item">Remember Me Functionality</div>
+                                <div class="subtopic-item">User Loader Function</div>
+                                <div class="subtopic-item">Logout & Session Cleanup</div>
+                                <div class="subtopic-item">Security Best Practices</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>auth.py - Authentication Blueprint</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Blueprint, render_template, request, flash, redirect, url_for
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> login_user, logout_user, login_required, current_user
+<span class="keyword">from</span> werkzeug.urls <span class="keyword">import</span> url_parse
+<span class="keyword">from</span> models <span class="keyword">import</span> User, db
+<span class="keyword">from</span> forms <span class="keyword">import</span> LoginForm, RegistrationForm
+
+auth = Blueprint(<span class="string">'auth'</span>, __name__)
+
+@auth.route(<span class="string">'/login'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">login</span>():
+    <span class="keyword">if</span> current_user.is_authenticated:
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'main.index'</span>))
+    
+    form = LoginForm()
+    <span class="keyword">if</span> form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        
+        <span class="keyword">if</span> user <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">or</span> <span class="keyword">not</span> user.check_password(form.password.data):
+            flash(<span class="string">'Invalid username or password'</span>)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'auth.login'</span>))
+        
+        <span class="comment"># Log the user in</span>
+        login_user(user, remember=form.remember_me.data)
+        
+        <span class="comment"># Redirect to next page or index</span>
+        next_page = request.args.get(<span class="string">'next'</span>)
+        <span class="keyword">if</span> <span class="keyword">not</span> next_page <span class="keyword">or</span> url_parse(next_page).netloc != <span class="string">''</span>:
+            next_page = url_for(<span class="string">'main.index'</span>)
+        
+        flash(f<span class="string">'Welcome back, {user.username}!'</span>, <span class="string">'success'</span>)
+        <span class="keyword">return</span> redirect(next_page)
+    
+    <span class="keyword">return</span> render_template(<span class="string">'auth/login.html'</span>, title=<span class="string">'Sign In'</span>, form=form)
+
+@auth.route(<span class="string">'/logout'</span>)
+<span class="keyword">def</span> <span class="function">logout</span>():
+    logout_user()
+    flash(<span class="string">'You have been logged out.'</span>, <span class="string">'info'</span>)
+    <span class="keyword">return</span> redirect(url_for(<span class="string">'main.index'</span>))
+
+@auth.route(<span class="string">'/register'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">register</span>():
+    <span class="keyword">if</span> current_user.is_authenticated:
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'main.index'</span>))
+    
+    form = RegistrationForm()
+    <span class="keyword">if</span> form.validate_on_submit():
+        <span class="comment"># Check if user already exists</span>
+        existing_user = User.query.filter(
+            (User.username == form.username.data) | 
+            (User.email == form.email.data)
+        ).first()
+        
+        <span class="keyword">if</span> existing_user:
+            flash(<span class="string">'Username or email already exists'</span>, <span class="string">'error'</span>)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'auth.register'</span>))
+        
+        <span class="comment"># Create new user</span>
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash(<span class="string">'Congratulations, you are now registered!'</span>, <span class="string">'success'</span>)
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'auth.login'</span>))
+    
+    <span class="keyword">return</span> render_template(<span class="string">'auth/register.html'</span>, title=<span class="string">'Register'</span>, form=form)
+
+@auth.route(<span class="string">'/profile'</span>)
+@login_required
+<span class="keyword">def</span> <span class="function">profile</span>():
+    <span class="keyword">return</span> render_template(<span class="string">'auth/profile.html'</span>, user=current_user)
+
+@auth.route(<span class="string">'/change_password'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">change_password</span>():
+    form = ChangePasswordForm()
+    <span class="keyword">if</span> form.validate_on_submit():
+        <span class="keyword">if</span> current_user.check_password(form.old_password.data):
+            current_user.set_password(form.password.data)
+            db.session.commit()
+            flash(<span class="string">'Your password has been updated.'</span>, <span class="string">'success'</span>)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'auth.profile'</span>))
+        <span class="keyword">else</span>:
+            flash(<span class="string">'Invalid old password.'</span>, <span class="string">'error'</span>)
+    
+    <span class="keyword">return</span> render_template(<span class="string">'auth/change_password.html'</span>, form=form)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Login Manager Setup</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> LoginManager
+<span class="keyword">from</span> models <span class="keyword">import</span> db, User
+
+<span class="keyword">def</span> <span class="function">create_app</span>():
+    app = Flask(__name__)
+    app.config[<span class="string">'SECRET_KEY'</span>] = <span class="string">'your-secret-key'</span>
+    app.config[<span class="string">'SQLALCHEMY_DATABASE_URI'</span>] = <span class="string">'sqlite:///app.db'</span>
+    app.config[<span class="string">'SQLALCHEMY_TRACK_MODIFICATIONS'</span>] = <span class="keyword">False</span>
+    
+    <span class="comment"># Initialize extensions</span>
+    db.init_app(app)
+    
+    <span class="comment"># Setup Flask-Login</span>
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = <span class="string">'auth.login'</span>
+    login_manager.login_message = <span class="string">'Please log in to access this page.'</span>
+    login_manager.login_message_category = <span class="string">'info'</span>
+    
+    <span class="comment"># User loader function</span>
+    @login_manager.user_loader
+    <span class="keyword">def</span> <span class="function">load_user</span>(user_id):
+        <span class="keyword">return</span> User.query.get(int(user_id))
+    
+    <span class="comment"># Register blueprints</span>
+    <span class="keyword">from</span> auth <span class="keyword">import</span> auth <span class="keyword">as</span> auth_bp
+    app.register_blueprint(auth_bp, url_prefix=<span class="string">'/auth'</span>)
+    
+    <span class="keyword">from</span> main <span class="keyword">import</span> main <span class="keyword">as</span> main_bp
+    app.register_blueprint(main_bp)
+    
+    <span class="comment"># Update user's last seen time</span>
+    @app.before_request
+    <span class="keyword">def</span> <span class="function">before_request</span>():
+        <span class="keyword">if</span> current_user.is_authenticated:
+            current_user.last_seen = datetime.utcnow()
+            db.session.commit()
+    
+    <span class="keyword">return</span> app</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>models.py - User Model with Flask-Login</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> UserMixin
+<span class="keyword">from</span> werkzeug.security <span class="keyword">import</span> generate_password_hash, check_password_hash
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+db = SQLAlchemy()
+
+<span class="keyword">class</span> <span class="function">User</span>(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)
+    username = db.Column(db.String(64), index=<span class="keyword">True</span>, unique=<span class="keyword">True</span>)
+    email = db.Column(db.String(120), index=<span class="keyword">True</span>, unique=<span class="keyword">True</span>)
+    password_hash = db.Column(db.String(128))
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=<span class="keyword">True</span>)
+    
+    <span class="comment"># Flask-Login required methods</span>
+    <span class="keyword">def</span> <span class="function">get_id</span>(self):
+        <span class="keyword">return</span> str(self.id)
+    
+    <span class="keyword">def</span> <span class="function">is_authenticated</span>(self):
+        <span class="keyword">return</span> <span class="keyword">True</span>
+    
+    <span class="keyword">def</span> <span class="function">is_anonymous</span>(self):
+        <span class="keyword">return</span> <span class="keyword">False</span>
+    
+    <span class="keyword">def</span> <span class="function">is_active</span>(self):
+        <span class="keyword">return</span> self.is_active
+    
+    <span class="comment"># Password methods</span>
+    <span class="keyword">def</span> <span class="function">set_password</span>(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    <span class="keyword">def</span> <span class="function">check_password</span>(self, password):
+        <span class="keyword">return</span> check_password_hash(self.password_hash, password)
+    
+    <span class="comment"># Avatar method (using Gravatar)</span>
+    <span class="keyword">def</span> <span class="function">avatar</span>(self, size):
+        <span class="keyword">import</span> hashlib
+        digest = hashlib.md5(self.email.lower().encode(<span class="string">'utf-8'</span>)).hexdigest()
+        <span class="keyword">return</span> f<span class="string">'https://www.gravatar.com/avatar/{digest}?d=identicon&amp;s={size}'</span>
+    
+    <span class="keyword">def</span> <span class="function">__repr__</span>(self):
+        <span class="keyword">return</span> f<span class="string">'&lt;User {self.username}&gt;'</span></code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔐</div>
+                                    <a href="https://flask-login.readthedocs.io/en/latest/" class="resource-link" target="_blank">Flask-Login Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-logins" class="resource-link" target="_blank">Flask Mega-Tutorial Part 5: User Logins</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔒</div>
+                                    <a href="https://werkzeug.palletsprojects.com/en/3.0.x/utils/#werkzeug.security.generate_password_hash" class="resource-link" target="_blank">Werkzeug Password Hashing</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=CSHx6eCkmv0" class="resource-link" target="_blank">Flask Authentication Tutorial</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🛡️</div>
+                                    <a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/04-Authentication_Testing/" class="resource-link" target="_blank">OWASP Authentication Security</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continue with remaining days... Due to length constraints, I'll summarize the pattern -->
+            <!-- Days 6-20 would follow the same structure with appropriate topics -->
+            
+        </div>
+                    <!-- Day 6 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 6: Profiles, Avatars & UX</div>
+                        <div class="day-subtitle">User Profiles, Gravatar Integration & Activity Tracking</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">User Profile Views & Templates</div>
+                                <div class="subtopic-item">Gravatar Integration for Avatars</div>
+                                <div class="subtopic-item">User Activity Tracking</div>
+                                <div class="subtopic-item">Before Request Hook Implementation</div>
+                                <div class="subtopic-item">Template Context Processors</div>
+                                <div class="subtopic-item">Flash Messages & UX Improvements</div>
+                                <div class="subtopic-item">User Profile Editing Forms</div>
+                                <div class="subtopic-item">Follow/Unfollow System Design</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - User Last Seen Tracking</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_login <span class="keyword">import</span> current_user
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+@app.before_request
+<span class="keyword">def</span> <span class="function">before_request</span>():
+    <span class="keyword">if</span> current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
+@app.route(<span class="string">'/user/&lt;username&gt;'</span>)
+<span class="keyword">def</span> <span class="function">user</span>(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = user.posts.order_by(Post.timestamp.desc())
+    <span class="keyword">return</span> render_template(<span class="string">'user.html'</span>, user=user, posts=posts)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>models.py - Gravatar Avatar Method</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> hashlib
+
+<span class="keyword">class</span> <span class="function">User</span>(UserMixin, db.Model):
+    <span class="comment"># ... existing fields ...</span>
+    
+    <span class="keyword">def</span> <span class="function">avatar</span>(self, size):
+        digest = hashlib.md5(self.email.lower().encode(<span class="string">'utf-8'</span>)).hexdigest()
+        <span class="keyword">return</span> <span class="string">'https://www.gravatar.com/avatar/{}?d=identicon&s={}'</span>.format(
+            digest, size)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/user.html - User Profile Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>{% extends "base.html" %}
+
+{% block content %}
+&lt;div class="user-profile"&gt;
+    &lt;img src="{{ user.avatar(128) }}" alt="{{ user.username }}'s avatar"&gt;
+    &lt;h1&gt;{{ user.username }}&lt;/h1&gt;
+    {% if user.about_me %}
+        &lt;p&gt;{{ user.about_me }}&lt;/p&gt;
+    {% endif %}
+    {% if user.last_seen %}
+        &lt;p&gt;Last seen: {{ moment(user.last_seen).format('LLL') }}&lt;/p&gt;
+    {% endif %}
+    
+    &lt;div class="user-posts"&gt;
+        {% for post in posts %}
+            &lt;div class="post"&gt;
+                &lt;p&gt;{{ post.body }}&lt;/p&gt;
+                &lt;small&gt;{{ moment(post.timestamp).fromNow() }}&lt;/small&gt;
+            &lt;/div&gt;
+        {% endfor %}
+    &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-vi-profile-page-and-avatars" class="resource-link" target="_blank">Flask Mega-Tutorial Part 6: Profiles</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎨</div>
+                                    <a href="https://en.gravatar.com/site/implement/" class="resource-link" target="_blank">Gravatar API Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=Qr4QMBUPxWo" class="resource-link" target="_blank">Flask User Profiles Tutorial</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/api/#flask.Flask.before_request" class="resource-link" target="_blank">Flask before_request Hook</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://moment.github.io/luxon/" class="resource-link" target="_blank">Moment.js Date Formatting</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 7 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 7: Error Handling & Logging</div>
+                        <div class="day-subtitle">Custom Error Pages, Logging & Debug Tools</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Custom Error Handlers</div>
+                                <div class="subtopic-item">404 & 500 Error Pages</div>
+                                <div class="subtopic-item">Logging Configuration</div>
+                                <div class="subtopic-item">File-based Logging</div>
+                                <div class="subtopic-item">Email Alerts on Errors</div>
+                                <div class="subtopic-item">Debug Toolbar Integration</div>
+                                <div class="subtopic-item">Sentry Error Tracking</div>
+                                <div class="subtopic-item">Log Rotation & Management</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Error Handlers</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>@app.errorhandler(404)
+<span class="keyword">def</span> <span class="function">not_found_error</span>(error):
+    <span class="keyword">return</span> render_template(<span class="string">'errors/404.html'</span>), 404
+
+@app.errorhandler(500)
+<span class="keyword">def</span> <span class="function">internal_error</span>(error):
+    db.session.rollback()
+    <span class="keyword">return</span> render_template(<span class="string">'errors/500.html'</span>), 500
+
+@app.errorhandler(403)
+<span class="keyword">def</span> <span class="function">forbidden_error</span>(error):
+    <span class="keyword">return</span> render_template(<span class="string">'errors/403.html'</span>), 403</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Logging Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> logging
+<span class="keyword">from</span> logging.handlers <span class="keyword">import</span> SMTPHandler, RotatingFileHandler
+<span class="keyword">import</span> os
+
+<span class="keyword">if</span> <span class="keyword">not</span> app.debug:
+    <span class="comment"># Email error handler</span>
+    <span class="keyword">if</span> app.config[<span class="string">'MAIL_SERVER'</span>]:
+        auth = <span class="keyword">None</span>
+        <span class="keyword">if</span> app.config[<span class="string">'MAIL_USERNAME'</span>] <span class="keyword">or</span> app.config[<span class="string">'MAIL_PASSWORD'</span>]:
+            auth = (app.config[<span class="string">'MAIL_USERNAME'</span>], app.config[<span class="string">'MAIL_PASSWORD'</span>])
+        secure = <span class="keyword">None</span>
+        <span class="keyword">if</span> app.config[<span class="string">'MAIL_USE_TLS'</span>]:
+            secure = ()
+        mail_handler = SMTPHandler(
+            mailhost=(app.config[<span class="string">'MAIL_SERVER'</span>], app.config[<span class="string">'MAIL_PORT'</span>]),
+            fromaddr=<span class="string">'no-reply@'</span> + app.config[<span class="string">'MAIL_SERVER'</span>],
+            toaddrs=app.config[<span class="string">'ADMINS'</span>], subject=<span class="string">'Flask App Failure'</span>,
+            credentials=auth, secure=secure)
+        mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(mail_handler)
+    
+    <span class="comment"># File logging</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">'logs'</span>):
+        os.mkdir(<span class="string">'logs'</span>)
+    file_handler = RotatingFileHandler(<span class="string">'logs/app.log'</span>, maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(logging.Formatter(
+        <span class="string">'%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'</span>))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/errorhandling/" class="resource-link" target="_blank">Flask Error Handling Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📚</div>
+                                    <a href="https://docs.python.org/3/howto/logging.html" class="resource-link" target="_blank">Python Logging HOWTO</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌐</div>
+                                    <a href="https://docs.sentry.io/platforms/python/guides/flask/" class="resource-link" target="_blank">Sentry Flask Integration</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=QnDWIZuWYW0" class="resource-link" target="_blank">Flask Error Handling Tutorial</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://flask-debugtoolbar.readthedocs.io/en/latest/" class="resource-link" target="_blank">Flask Debug Toolbar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 8 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 8: Followers & Social Graph</div>
+                        <div class="day-subtitle">Many-to-Many Relationships & Social Features</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Self-Referential Many-to-Many</div>
+                                <div class="subtopic-item">Association Tables</div>
+                                <div class="subtopic-item">Follow & Unfollow Methods</div>
+                                <div class="subtopic-item">Combined Post Feeds</div>
+                                <div class="subtopic-item">Followers & Following Lists</div>
+                                <div class="subtopic-item">Social Graph Queries</div>
+                                <div class="subtopic-item">Activity Streams</div>
+                                <div class="subtopic-item">Relationship Status UI</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>models.py - Followers Association Table</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>followers = db.Table(<span class="string">'followers'</span>,
+    db.Column(<span class="string">'follower_id'</span>, db.Integer, db.ForeignKey(<span class="string">'user.id'</span>)),
+    db.Column(<span class="string">'followed_id'</span>, db.Integer, db.ForeignKey(<span class="string">'user.id'</span>))
+)
+
+<span class="keyword">class</span> <span class="function">User</span>(UserMixin, db.Model):
+    <span class="comment"># ... existing fields ...</span>
+    
+    followed = db.relationship(
+        <span class="string">'User'</span>, secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref(<span class="string">'followers'</span>, lazy=<span class="string">'dynamic'</span>), lazy=<span class="string">'dynamic'</span>)
+
+    <span class="keyword">def</span> <span class="function">follow</span>(self, user):
+        <span class="keyword">if</span> <span class="keyword">not</span> self.is_following(user):
+            self.followed.append(user)
+
+    <span class="keyword">def</span> <span class="function">unfollow</span>(self, user):
+        <span class="keyword">if</span> self.is_following(user):
+            self.followed.remove(user)
+
+    <span class="keyword">def</span> <span class="function">is_following</span>(self, user):
+        <span class="keyword">return</span> self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
+
+    <span class="keyword">def</span> <span class="function">followed_posts</span>(self):
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        <span class="keyword">return</span> followed.union(own).order_by(Post.timestamp.desc())</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-viii-followers" class="resource-link" target="_blank">Flask Mega-Tutorial Part 8: Followers</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html" class="resource-link" target="_blank">SQLAlchemy Relationships</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=51c3DqkSHUs" class="resource-link" target="_blank">Many-to-Many Relationships</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/models/#many-to-many" class="resource-link" target="_blank">Flask-SQLAlchemy Many-to-Many</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 9 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 9: Pagination & AJAX</div>
+                        <div class="day-subtitle">Query Pagination & Dynamic Content Loading</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">SQLAlchemy Pagination</div>
+                                <div class="subtopic-item">Pagination Object Methods</div>
+                                <div class="subtopic-item">Template Pagination Links</div>
+                                <div class="subtopic-item">AJAX with Fetch API</div>
+                                <div class="subtopic-item">JSON Response Formatting</div>
+                                <div class="subtopic-item">Infinite Scrolling</div>
+                                <div class="subtopic-item">Loading States & UX</div>
+                                <div class="subtopic-item">Progressive Enhancement</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Pagination Implementation</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>@app.route(<span class="string">'/index'</span>)
+@app.route(<span class="string">'/index/&lt;int:page&gt;'</span>)
+@login_required
+<span class="keyword">def</span> <span class="function">index</span>(page=1):
+    posts = current_user.followed_posts().paginate(
+        page=page, per_page=app.config[<span class="string">'POSTS_PER_PAGE'</span>], 
+        error_out=<span class="keyword">False</span>)
+    
+    next_url = url_for(<span class="string">'index'</span>, page=posts.next_num) \
+        <span class="keyword">if</span> posts.has_next <span class="keyword">else</span> <span class="keyword">None</span>
+    prev_url = url_for(<span class="string">'index'</span>, page=posts.prev_num) \
+        <span class="keyword">if</span> posts.has_prev <span class="keyword">else</span> <span class="keyword">None</span>
+    
+    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, title=<span class="string">'Home'</span>, posts=posts,
+                         next_url=next_url, prev_url=prev_url)
+
+@app.route(<span class="string">'/api/posts'</span>)
+@login_required
+<span class="keyword">def</span> <span class="function">api_posts</span>():
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page=page, per_page=5, error_out=<span class="keyword">False</span>)
+    
+    data = {
+        <span class="string">'posts'</span>: [{
+            <span class="string">'id'</span>: p.id,
+            <span class="string">'body'</span>: p.body,
+            <span class="string">'timestamp'</span>: p.timestamp.isoformat(),
+            <span class="string">'author'</span>: p.author.username
+        } <span class="keyword">for</span> p <span class="keyword">in</span> posts.items],
+        <span class="string">'has_next'</span>: posts.has_next,
+        <span class="string">'next_num'</span>: posts.next_num
+    }
+    <span class="keyword">return</span> jsonify(data)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/index.html - Pagination Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>&lt;div class="posts-container"&gt;
+    {% for post in posts.items %}
+        &lt;div class="post"&gt;
+            &lt;p&gt;{{ post.body }}&lt;/p&gt;
+            &lt;small&gt;by {{ post.author.username }} {{ moment(post.timestamp).fromNow() }}&lt;/small&gt;
+        &lt;/div&gt;
+    {% endfor %}
+&lt;/div&gt;
+
+&lt;nav class="pagination"&gt;
+    {% if prev_url %}
+        &lt;a href="{{ prev_url }}" class="btn btn-outline-primary"&gt;&laquo; Newer posts&lt;/a&gt;
+    {% endif %}
+    {% if next_url %}
+        &lt;a href="{{ next_url }}" class="btn btn-outline-primary"&gt;Older posts &raquo;&lt;/a&gt;
+    {% endif %}
+&lt;/nav&gt;
+
+&lt;button id="load-more" class="btn btn-primary" style="display: none;"&gt;Load More&lt;/button&gt;
+
+&lt;script&gt;
+let currentPage = 1;
+const loadMoreBtn = document.getElementById('load-more');
+
+async function loadMorePosts() {
+    currentPage++;
+    const response = await fetch(`/api/posts?page=${currentPage}`);
+    const data = await response.json();
+    
+    data.posts.forEach(post =&gt; {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
+        postDiv.innerHTML = `
+            &lt;p&gt;${post.body}&lt;/p&gt;
+            &lt;small&gt;by ${post.author} ${new Date(post.timestamp).toLocaleString()}&lt;/small&gt;
+        `;
+        document.querySelector('.posts-container').appendChild(postDiv);
+    });
+    
+    if (!data.has_next) {
+        loadMoreBtn.style.display = 'none';
+    }
+}
+
+loadMoreBtn.addEventListener('click', loadMorePosts);
+&lt;/script&gt;</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ix-pagination" class="resource-link" target="_blank">Flask Mega-Tutorial Part 9: Pagination</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/queries/#pagination" class="resource-link" target="_blank">Flask-SQLAlchemy Pagination</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌐</div>
+                                    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" class="resource-link" target="_blank">Fetch API Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=3c-iBn73dDE" class="resource-link" target="_blank">AJAX in Flask Tutorial</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 10 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 10: Email & Background Tasks</div>
+                        <div class="day-subtitle">Email Integration & Asynchronous Task Processing</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask-Mail Configuration</div>
+                                <div class="subtopic-item">Email Templates & HTML Messages</div>
+                                <div class="subtopic-item">Celery Task Queue Setup</div>
+                                <div class="subtopic-item">Redis as Message Broker</div>
+                                <div class="subtopic-item">Background Task Processing</div>
+                                <div class="subtopic-item">Periodic Tasks with Celery Beat</div>
+                                <div class="subtopic-item">Task Status Monitoring</div>
+                                <div class="subtopic-item">Email Delivery Optimization</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Flask-Mail Setup</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_mail <span class="keyword">import</span> Mail, Message
+<span class="keyword">from</span> threading <span class="keyword">import</span> Thread
+
+app.config[<span class="string">'MAIL_SERVER'</span>] = os.environ.get(<span class="string">'MAIL_SERVER'</span>)
+app.config[<span class="string">'MAIL_PORT'</span>] = int(os.environ.get(<span class="string">'MAIL_PORT'</span>) <span class="keyword">or</span> 25)
+app.config[<span class="string">'MAIL_USE_TLS'</span>] = os.environ.get(<span class="string">'MAIL_USE_TLS'</span>, <span class="string">'true'</span>).lower() <span class="keyword">in</span> [<span class="string">'true'</span>, <span class="string">'on'</span>, <span class="string">'1'</span>]
+app.config[<span class="string">'MAIL_USERNAME'</span>] = os.environ.get(<span class="string">'MAIL_USERNAME'</span>)
+app.config[<span class="string">'MAIL_PASSWORD'</span>] = os.environ.get(<span class="string">'MAIL_PASSWORD'</span>)
+app.config[<span class="string">'ADMINS'</span>] = [<span class="string">'your-email@example.com'</span>]
+
+mail = Mail(app)
+
+<span class="keyword">def</span> <span class="function">send_async_email</span>(app, msg):
+    <span class="keyword">with</span> app.app_context():
+        mail.send(msg)
+
+<span class="keyword">def</span> <span class="function">send_email</span>(subject, sender, recipients, text_body, html_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    msg.html = html_body
+    Thread(target=send_async_email, args=(app, msg)).start()</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>tasks.py - Celery Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> celery <span class="keyword">import</span> Celery
+<span class="keyword">from</span> flask_mail <span class="keyword">import</span> Message
+<span class="keyword">from</span> app <span class="keyword">import</span> create_app, mail
+
+<span class="keyword">def</span> <span class="function">make_celery</span>(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config[<span class="string">'CELERY_RESULT_BACKEND'</span>],
+        broker=app.config[<span class="string">'CELERY_BROKER_URL'</span>]
+    )
+    
+    <span class="keyword">class</span> <span class="function">ContextTask</span>(celery.Task):
+        <span class="keyword">def</span> <span class="function">__call__</span>(self, *args, **kwargs):
+            <span class="keyword">with</span> app.app_context():
+                <span class="keyword">return</span> self.run(*args, **kwargs)
+    
+    celery.Task = ContextTask
+    <span class="keyword">return</span> celery
+
+app = create_app()
+celery = make_celery(app)
+
+@celery.task
+<span class="keyword">def</span> <span class="function">send_async_email</span>(subject, sender, recipients, text_body, html_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    msg.html = html_body
+    <span class="keyword">with</span> app.app_context():
+        mail.send(msg)
+
+@celery.task
+<span class="keyword">def</span> <span class="function">example_background_task</span>(param):
+    <span class="comment"># Simulate long-running task</span>
+    <span class="keyword">import</span> time
+    time.sleep(10)
+    <span class="keyword">return</span> f<span class="string">'Task completed with parameter: {param}'</span></code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📧</div>
+                                    <a href="https://pythonhosted.org/Flask-Mail/" class="resource-link" target="_blank">Flask-Mail Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🐴</div>
+                                    <a href="https://docs.celeryproject.org/en/stable/getting-started/introduction.html" class="resource-link" target="_blank">Celery Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=iwxzilyxTbQ" class="resource-link" target="_blank">Flask Email Tutorial</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-x-email-support" class="resource-link" target="_blank">Flask Mega-Tutorial Part 10: Email</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://redis.io/documentation" class="resource-link" target="_blank">Redis Documentation</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 11 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 11: CSS Frameworks & UI Enhancement</div>
+                        <div class="day-subtitle">Bootstrap Integration & Modern UI Design</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Bootstrap 5 Integration</div>
+                                <div class="subtopic-item">Responsive Grid System</div>
+                                <div class="subtopic-item">Component Library Usage</div>
+                                <div class="subtopic-item">Custom SCSS Variables</div>
+                                <div class="subtopic-item">Template Partials & Includes</div>
+                                <div class="subtopic-item">Form Styling & Validation</div>
+                                <div class="subtopic-item">JavaScript Components</div>
+                                <div class="subtopic-item">Mobile-First Design</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/base.html - Bootstrap Integration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;title&gt;{% block title %}{% if title %}{{ title }} - Flask App{% else %}Flask App{% endif %}{% endblock %}&lt;/title&gt;
+    
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"&gt;
+    {% block styles %}{% endblock %}
+&lt;/head&gt;
+&lt;body&gt;
+    {% include '_navbar.html' %}
+    
+    &lt;div class="container-fluid"&gt;
+        {% include '_flash_messages.html' %}
+        {% block content %}{% endblock %}
+    &lt;/div&gt;
+    
+    &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+    {% block scripts %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/_navbar.html - Navigation Component</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>&lt;nav class="navbar navbar-expand-lg navbar-dark bg-primary"&gt;
+    &lt;div class="container"&gt;
+        &lt;a class="navbar-brand" href="{{ url_for('index') }}"&gt;Flask App&lt;/a&gt;
+        
+        &lt;button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"&gt;
+            &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+        &lt;/button&gt;
+        
+        &lt;div class="collapse navbar-collapse" id="navbarNav"&gt;
+            &lt;ul class="navbar-nav me-auto"&gt;
+                &lt;li class="nav-item"&gt;
+                    &lt;a class="nav-link" href="{{ url_for('index') }}"&gt;Home&lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li class="nav-item"&gt;
+                    &lt;a class="nav-link" href="{{ url_for('explore') }}"&gt;Explore&lt;/a&gt;
+                &lt;/li&gt;
+            &lt;/ul&gt;
+            
+            &lt;ul class="navbar-nav"&gt;
+                {% if current_user.is_anonymous %}
+                    &lt;li class="nav-item"&gt;
+                        &lt;a class="nav-link" href="{{ url_for('auth.login') }}"&gt;Login&lt;/a&gt;
+                    &lt;/li&gt;
+                {% else %}
+                    &lt;li class="nav-item dropdown"&gt;
+                        &lt;a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"&gt;
+                            {{ current_user.username }}
+                        &lt;/a&gt;
+                        &lt;ul class="dropdown-menu"&gt;
+                            &lt;li&gt;&lt;a class="dropdown-item" href="{{ url_for('user', username=current_user.username) }}"&gt;Profile&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;hr class="dropdown-divider"&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a class="dropdown-item" href="{{ url_for('auth.logout') }}"&gt;Logout&lt;/a&gt;&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/li&gt;
+                {% endif %}
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎨</div>
+                                    <a href="https://getbootstrap.com/docs/5.3/getting-started/introduction/" class="resource-link" target="_blank">Bootstrap 5 Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📱</div>
+                                    <a href="https://getbootstrap.com/docs/5.3/layout/grid/" class="resource-link" target="_blank">Bootstrap Grid System</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=4sosXZsdy-s" class="resource-link" target="_blank">Bootstrap 5 Crash Course</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌐</div>
+                                    <a href="https://bootswatch.com/" class="resource-link" target="_blank">Bootstrap Themes - Bootswatch</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xi-facelift" class="resource-link" target="_blank">Flask Mega-Tutorial Part 11: Facelift</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 12 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 12: Internationalization (i18n)</div>
+                        <div class="day-subtitle">Multi-language Support & Localization</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask-Babel Configuration</div>
+                                <div class="subtopic-item">Locale Selection & Detection</div>
+                                <div class="subtopic-item">Message Extraction & Catalogs</div>
+                                <div class="subtopic-item">Template String Translation</div>
+                                <div class="subtopic-item">Dynamic Content Translation</div>
+                                <div class="subtopic-item">Date & Time Localization</div>
+                                <div class="subtopic-item">Lazy Translation Strings</div>
+                                <div class="subtopic-item">Language Switching UI</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Flask-Babel Setup</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask_babel <span class="keyword">import</span> Babel, _, get_locale
+<span class="keyword">from</span> flask <span class="keyword">import</span> request
+
+babel = Babel(app)
+
+@babel.localeselector
+<span class="keyword">def</span> <span class="function">get_locale</span>():
+    <span class="comment"># 1. Check if locale is provided in URL</span>
+    <span class="keyword">if</span> request.args.get(<span class="string">'lang'</span>):
+        session[<span class="string">'language'</span>] = request.args.get(<span class="string">'lang'</span>)
+    
+    <span class="comment"># 2. Check if locale is stored in session</span>
+    <span class="keyword">if</span> <span class="string">'language'</span> <span class="keyword">in</span> session:
+        <span class="keyword">return</span> session[<span class="string">'language'</span>]
+    
+    <span class="comment"># 3. Use browser's preferred language</span>
+    <span class="keyword">return</span> request.accept_languages.best_match(app.config[<span class="string">'LANGUAGES'</span>]) <span class="keyword">or</span> \
+           app.config[<span class="string">'LANGUAGES'</span>][0]
+
+app.config[<span class="string">'LANGUAGES'</span>] = {
+    <span class="string">'en'</span>: <span class="string">'English'</span>,
+    <span class="string">'es'</span>: <span class="string">'Español'</span>,
+    <span class="string">'fr'</span>: <span class="string">'Français'</span>
+}
+
+@app.route(<span class="string">'/set_language/&lt;language&gt;'</span>)
+<span class="keyword">def</span> <span class="function">set_language</span>(language=<span class="keyword">None</span>):
+    session[<span class="string">'language'</span>] = language
+    <span class="keyword">return</span> redirect(request.referrer <span class="keyword">or</span> url_for(<span class="string">'index'</span>))</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>babel.cfg - Babel Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>[python: **.py]
+[jinja2: **/templates/**.html]
+extensions=jinja2.ext.autoescape,jinja2.ext.with_</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>templates/base.html - Language Switcher</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>&lt;div class="language-switcher"&gt;
+    {% for code, name in config.LANGUAGES.items() %}
+        {% if code != get_locale() %}
+            &lt;a href="{{ url_for('set_language', language=code) }}"&gt;{{ name }}&lt;/a&gt;
+        {% endif %}
+    {% endfor %}
+&lt;/div&gt;
+
+&lt;h1&gt;{{ _('Welcome to Flask App') }}&lt;/h1&gt;
+&lt;p&gt;{{ _('Hello, %(username)s!', username=current_user.username) }}&lt;/p&gt;</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌍</div>
+                                    <a href="https://pythonhosted.org/Flask-Babel/" class="resource-link" target="_blank">Flask-Babel Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiii-i18n-and-l10n" class="resource-link" target="_blank">Flask Mega-Tutorial Part 13: i18n</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://babel.pocoo.org/en/latest/" class="resource-link" target="_blank">Babel Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=xNvxkAloZaQ" class="resource-link" target="_blank">Flask i18n Tutorial</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 13 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 13: Full-Text Search</div>
+                        <div class="day-subtitle">Search Implementation with Whoosh & Elasticsearch</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Whoosh Search Engine Setup</div>
+                                <div class="subtopic-item">Search Index Creation</div>
+                                <div class="subtopic-item">Full-Text Search Queries</div>
+                                <div class="subtopic-item">Search Result Ranking</div>
+                                <div class="subtopic-item">Search Form Implementation</div>
+                                <div class="subtopic-item">Elasticsearch Integration</div>
+                                <div class="subtopic-item">Search Autocomplete</div>
+                                <div class="subtopic-item">Advanced Search Filters</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>search.py - Whoosh Search Implementation</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> whoosh.index <span class="keyword">import</span> create_in, open_dir
+<span class="keyword">from</span> whoosh.fields <span class="keyword">import</span> *
+<span class="keyword">from</span> whoosh.qparser <span class="keyword">import</span> QueryParser
+<span class="keyword">import</span> os
+
+<span class="comment"># Create search schema</span>
+schema = Schema(id=ID(stored=<span class="keyword">True</span>),
+                title=TEXT(stored=<span class="keyword">True</span>),
+                content=TEXT(stored=<span class="keyword">True</span>),
+                author=TEXT(stored=<span class="keyword">True</span>))
+
+<span class="keyword">def</span> <span class="function">create_index</span>():
+    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">'search_index'</span>):
+        os.mkdir(<span class="string">'search_index'</span>)
+    ix = create_in(<span class="string">'search_index'</span>, schema)
+    <span class="keyword">return</span> ix
+
+<span class="keyword">def</span> <span class="function">add_to_index</span>(index, model):
+    writer = index.writer()
+    writer.add_document(
+        id=str(model.id),
+        title=model.title <span class="keyword">or</span> <span class="string">''</span>,
+        content=model.body <span class="keyword">or</span> <span class="string">''</span>,
+        author=model.author.username <span class="keyword">if</span> model.author <span class="keyword">else</span> <span class="string">''</span>
+    )
+    writer.commit()
+
+<span class="keyword">def</span> <span class="function">search_posts</span>(query_string, limit=50):
+    ix = open_dir(<span class="string">'search_index'</span>)
+    <span class="keyword">with</span> ix.searcher() <span class="keyword">as</span> searcher:
+        query = QueryParser(<span class="string">'content'</span>, ix.schema).parse(query_string)
+        results = searcher.search(query, limit=limit)
+        
+        ids = [r[<span class="string">'id'</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results]
+        <span class="keyword">return</span> Post.query.filter(Post.id.in_(ids)).all()</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app.py - Search Route</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>@app.route(<span class="string">'/search'</span>)
+@login_required
+<span class="keyword">def</span> <span class="function">search</span>():
+    <span class="keyword">if</span> <span class="keyword">not</span> g.search_form.validate():
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'explore'</span>))
+    
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    posts, total = Post.search(g.search_form.q.data, page,
+                              app.config[<span class="string">'POSTS_PER_PAGE'</span>])
+    
+    next_url = url_for(<span class="string">'search'</span>, q=g.search_form.q.data, page=page + 1) \
+        <span class="keyword">if</span> total > page * app.config[<span class="string">'POSTS_PER_PAGE'</span>] <span class="keyword">else</span> <span class="keyword">None</span>
+    prev_url = url_for(<span class="string">'search'</span>, q=g.search_form.q.data, page=page - 1) \
+        <span class="keyword">if</span> page > 1 <span class="keyword">else</span> <span class="keyword">None</span>
+    
+    <span class="keyword">return</span> render_template(<span class="string">'search.html'</span>, title=_(<span class="string">'Search'</span>), posts=posts,
+                         next_url=next_url, prev_url=prev_url)
+
+@app.before_request
+<span class="keyword">def</span> <span class="function">before_request</span>():
+    <span class="keyword">if</span> current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+        g.search_form = SearchForm()
+    g.locale = str(get_locale())</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔍</div>
+                                    <a href="https://whoosh.readthedocs.io/en/latest/" class="resource-link" target="_blank">Whoosh Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search" class="resource-link" target="_blank">Flask Mega-Tutorial Part 16: Search</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌐</div>
+                                    <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html" class="resource-link" target="_blank">Elasticsearch Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=klyGp3jbdrA" class="resource-link" target="_blank">Full-Text Search Tutorial</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 14 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 14: RESTful APIs</div>
+                        <div class="day-subtitle">JSON APIs, REST Principles & API Design</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">REST API Principles</div>
+                                <div class="subtopic-item">JSON Response Formatting</div>
+                                <div class="subtopic-item">HTTP Status Codes</div>
+                                <div class="subtopic-item">Request Parsing & Validation</div>
+                                <div class="subtopic-item">API Authentication</div>
+                                <div class="subtopic-item">Error Handling in APIs</div>
+                                <div class="subtopic-item">API Versioning</div>
+                                <div class="subtopic-item">Rate Limiting</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>api/posts.py - Posts API Blueprint</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Blueprint, jsonify, request, url_for
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> login_required, current_user
+<span class="keyword">from</span> app.models <span class="keyword">import</span> Post, db
+
+bp = Blueprint(<span class="string">'api_posts'</span>, __name__)
+
+@bp.route(<span class="string">'/posts'</span>, methods=[<span class="string">'GET'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">get_posts</span>():
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    per_page = min(request.args.get(<span class="string">'per_page'</span>, 10, type=int), 100)
+    
+    data = Post.to_collection_dict(
+        Post.query.order_by(Post.timestamp.desc()), 
+        page, per_page, <span class="string">'api_posts.get_posts'</span>)
+    
+    <span class="keyword">return</span> jsonify(data)
+
+@bp.route(<span class="string">'/posts'</span>, methods=[<span class="string">'POST'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">create_post</span>():
+    data = request.get_json() <span class="keyword">or</span> {}
+    
+    <span class="keyword">if</span> <span class="string">'body'</span> <span class="keyword">not</span> <span class="keyword">in</span> data:
+        <span class="keyword">return</span> bad_request(<span class="string">'must include body field'</span>)
+    
+    post = Post()
+    post.from_dict(data)
+    post.author = current_user
+    db.session.add(post)
+    db.session.commit()
+    
+    response = jsonify(post.to_dict())
+    response.status_code = 201
+    response.headers[<span class="string">'Location'</span>] = url_for(<span class="string">'api_posts.get_post'</span>, id=post.id)
+    <span class="keyword">return</span> response
+
+@bp.route(<span class="string">'/posts/&lt;int:id&gt;'</span>, methods=[<span class="string">'GET'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">get_post</span>(id):
+    <span class="keyword">return</span> jsonify(Post.query.get_or_404(id).to_dict())
+
+@bp.route(<span class="string">'/posts/&lt;int:id&gt;'</span>, methods=[<span class="string">'PUT'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">update_post</span>(id):
+    post = Post.query.get_or_404(id)
+    
+    <span class="keyword">if</span> post.author != current_user:
+        <span class="keyword">return</span> jsonify({<span class="string">'error'</span>: <span class="string">'Forbidden'</span>}), 403
+    
+    data = request.get_json() <span class="keyword">or</span> {}
+    post.from_dict(data)
+    db.session.commit()
+    
+    <span class="keyword">return</span> jsonify(post.to_dict())</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>models.py - API Serialization Methods</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">class</span> <span class="function">PaginatedAPIMixin</span>(object):
+    @staticmethod
+    <span class="keyword">def</span> <span class="function">to_collection_dict</span>(query, page, per_page, endpoint, **kwargs):
+        resources = query.paginate(page=page, per_page=per_page, error_out=<span class="keyword">False</span>)
+        data = {
+            <span class="string">'items'</span>: [item.to_dict() <span class="keyword">for</span> item <span class="keyword">in</span> resources.items],
+            <span class="string">'_meta'</span>: {
+                <span class="string">'page'</span>: page,
+                <span class="string">'per_page'</span>: per_page,
+                <span class="string">'total_pages'</span>: resources.pages,
+                <span class="string">'total_items'</span>: resources.total
+            },
+            <span class="string">'_links'</span>: {
+                <span class="string">'self'</span>: url_for(endpoint, page=page, per_page=per_page, **kwargs),
+                <span class="string">'next'</span>: url_for(endpoint, page=page + 1, per_page=per_page, **kwargs) 
+                         <span class="keyword">if</span> resources.has_next <span class="keyword">else</span> <span class="keyword">None</span>,
+                <span class="string">'prev'</span>: url_for(endpoint, page=page - 1, per_page=per_page, **kwargs) 
+                         <span class="keyword">if</span> resources.has_prev <span class="keyword">else</span> <span class="keyword">None</span>
+            }
+        }
+        <span class="keyword">return</span> data
+
+<span class="keyword">class</span> <span class="function">Post</span>(PaginatedAPIMixin, db.Model):
+    <span class="comment"># ... existing fields ...</span>
+    
+    <span class="keyword">def</span> <span class="function">to_dict</span>(self):
+        data = {
+            <span class="string">'id'</span>: self.id,
+            <span class="string">'body'</span>: self.body,
+            <span class="string">'timestamp'</span>: self.timestamp.isoformat() + <span class="string">'Z'</span>,
+            <span class="string">'author'</span>: self.author.username,
+            <span class="string">'_links'</span>: {
+                <span class="string">'self'</span>: url_for(<span class="string">'api_posts.get_post'</span>, id=self.id),
+                <span class="string">'author'</span>: url_for(<span class="string">'api_users.get_user'</span>, id=self.user_id)
+            }
+        }
+        <span class="keyword">return</span> data
+
+    <span class="keyword">def</span> <span class="function">from_dict</span>(self, data):
+        <span class="keyword">for</span> field <span class="keyword">in</span> [<span class="string">'body'</span>]:
+            <span class="keyword">if</span> field <span class="keyword">in</span> data:
+                setattr(self, field, data[field])</code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxiii-application-programming-interfaces-apis" class="resource-link" target="_blank">Flask Mega-Tutorial Part 23: APIs</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🌐</div>
+                                    <a href="https://restfulapi.net/" class="resource-link" target="_blank">REST API Design Best Practices</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://flask-restful.readthedocs.io/en/latest/" class="resource-link" target="_blank">Flask-RESTful Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=GMppyAPbLYk" class="resource-link" target="_blank">Building APIs with Flask</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://httpstatuses.com/" class="resource-link" target="_blank">HTTP Status Codes Reference</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 15 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 15: Blueprints & App Factory</div>
+                        <div class="day-subtitle">Application Structure & Modular Design</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Application Factory Pattern</div>
+                                <div class="subtopic-item">Blueprint Registration</div>
+                                <div class="subtopic-item">Configuration Management</div>
+                                <div class="subtopic-item">Extension Initialization</div>
+                                <div class="subtopic-item">Package Structure</div>
+                                <div class="subtopic-item">Blueprint URL Prefixes</div>
+                                <div class="subtopic-item">Template & Static Folders</div>
+                                <div class="subtopic-item">Error Handlers in Blueprints</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app/__init__.py - Application Factory</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask
+<span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy
+<span class="keyword">from</span> flask_migrate <span class="keyword">import</span> Migrate
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> LoginManager
+<span class="keyword">from</span> flask_mail <span class="keyword">import</span> Mail
+<span class="keyword">from</span> flask_babel <span class="keyword">import</span> Babel
+<span class="keyword">from</span> config <span class="keyword">import</span> Config
+
+<span class="comment"># Initialize extensions</span>
+db = SQLAlchemy()
+migrate = Migrate()
+login = LoginManager()
+mail = Mail()
+babel = Babel()
+
+<span class="keyword">def</span> <span class="function">create_app</span>(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    <span class="comment"># Initialize Flask extensions</span>
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login.init_app(app)
+    mail.init_app(app)
+    babel.init_app(app)
+
+    <span class="comment"># Configure login manager</span>
+    login.login_view = <span class="string">'auth.login'</span>
+    login.login_message = _(<span class="string">'Please log in to access this page.'</span>)
+
+    <span class="comment"># Register Blueprints</span>
+    <span class="keyword">from</span> app.main <span class="keyword">import</span> bp <span class="keyword">as</span> main_bp
+    app.register_blueprint(main_bp)
+
+    <span class="keyword">from</span> app.auth <span class="keyword">import</span> bp <span class="keyword">as</span> auth_bp
+    app.register_blueprint(auth_bp, url_prefix=<span class="string">'/auth'</span>)
+
+    <span class="keyword">from</span> app.api <span class="keyword">import</span> bp <span class="keyword">as</span> api_bp
+    app.register_blueprint(api_bp, url_prefix=<span class="string">'/api'</span>)
+
+    <span class="comment"># Error handling</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> app.debug <span class="keyword">and</span> <span class="keyword">not</span> app.testing:
+        <span class="comment"># Set up logging, email handlers, etc.</span>
+        <span class="keyword">pass</span>
+
+    <span class="keyword">return</span> app
+
+<span class="keyword">from</span> app <span class="keyword">import</span> models</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app/main/__init__.py - Main Blueprint</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Blueprint
+
+bp = Blueprint(<span class="string">'main'</span>, __name__)
+
+<span class="keyword">from</span> app.main <span class="keyword">import</span> routes</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>app/main/routes.py - Main Routes</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> render_template, request, g, current_app
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> current_user, login_required
+<span class="keyword">from</span> app.main <span class="keyword">import</span> bp
+<span class="keyword">from</span> app.models <span class="keyword">import</span> Post
+
+@bp.before_app_request
+<span class="keyword">def</span> <span class="function">before_request</span>():
+    <span class="keyword">if</span> current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
+@bp.route(<span class="string">'/'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+@bp.route(<span class="string">'/index'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+@login_required
+<span class="keyword">def</span> <span class="function">index</span>():
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page=page, per_page=current_app.config[<span class="string">'POSTS_PER_PAGE'</span>],
+        error_out=<span class="keyword">False</span>)
+    
+    next_url = url_for(<span class="string">'main.index'</span>, page=posts.next_num) \
+        <span class="keyword">if</span> posts.has_next <span class="keyword">else</span> <span class="keyword">None</span>
+    prev_url = url_for(<span class="string">'main.index'</span>, page=posts.prev_num) \
+        <span class="keyword">if</span> posts.has_prev <span class="keyword">else</span> <span class="keyword">None</span>
+    
+    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, title=_(<span class="string">'Home'</span>), posts=posts,
+                         next_url=next_url, prev_url=prev_url)
+
+@bp.route(<span class="string">'/explore'</span>)
+@login_required
+<span class="keyword">def</span> <span class="function">explore</span>():
+    page = request.args.get(<span class="string">'page'</span>, 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page=page, per_page=current_app.config[<span class="string">'POSTS_PER_PAGE'</span>],
+        error_out=<span class="keyword">False</span>)
+    
+    next_url = url_for(<span class="string">'main.explore'</span>, page=posts.next_num) \
+        <span class="keyword">if</span> posts.has_next <span class="keyword">else</span> <span class="keyword">None</span>
+    prev_url = url_for(<span class="string">'main.explore'</span>, page=posts.prev_num) \
+        <span class="keyword">if</span> posts.has_prev <span class="keyword">else</span> <span class="keyword">None</span>
+    
+    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, title=_(<span class="string">'Explore'</span>), posts=posts,
+                         next_url=next_url, prev_url=prev_url)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>config.py - Configuration Classes</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> os
+<span class="keyword">from</span> dotenv <span class="keyword">import</span> load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, <span class="string">'.env'</span>))
+
+<span class="keyword">class</span> <span class="function">Config</span>(object):
+    SECRET_KEY = os.environ.get(<span class="string">'SECRET_KEY'</span>) <span class="keyword">or</span> <span class="string">'you-will-never-guess'</span>
+    SQLALCHEMY_DATABASE_URI = os.environ.get(<span class="string">'DATABASE_URL'</span>) <span class="keyword">or</span> \
+        <span class="string">'sqlite:///'</span> + os.path.join(basedir, <span class="string">'app.db'</span>)
+    SQLALCHEMY_TRACK_MODIFICATIONS = <span class="keyword">False</span>
+    
+    MAIL_SERVER = os.environ.get(<span class="string">'MAIL_SERVER'</span>)
+    MAIL_PORT = int(os.environ.get(<span class="string">'MAIL_PORT'</span>) <span class="keyword">or</span> 25)
+    MAIL_USE_TLS = os.environ.get(<span class="string">'MAIL_USE_TLS'</span>, <span class="string">'true'</span>).lower() <span class="keyword">in</span> [<span class="string">'true'</span>, <span class="string">'on'</span>, <span class="string">'1'</span>]
+    MAIL_USERNAME = os.environ.get(<span class="string">'MAIL_USERNAME'</span>)
+    MAIL_PASSWORD = os.environ.get(<span class="string">'MAIL_PASSWORD'</span>)
+    ADMINS = [<span class="string">'your-email@example.com'</span>]
+    
+    POSTS_PER_PAGE = 25
+    LANGUAGES = [<span class="string">'en'</span>, <span class="string">'es'</span>, <span class="string">'fr'</span>]
+
+<span class="keyword">class</span> <span class="function">DevelopmentConfig</span>(Config):
+    DEBUG = <span class="keyword">True</span>
+
+<span class="keyword">class</span> <span class="function">ProductionConfig</span>(Config):
+    DEBUG = <span class="keyword">False</span>
+
+<span class="keyword">class</span> <span class="function">TestingConfig</span>(Config):
+    TESTING = <span class="keyword">True</span>
+    SQLALCHEMY_DATABASE_URI = <span class="string">'sqlite://'</span></code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">📖</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/blueprints/" class="resource-link" target="_blank">Flask Blueprints Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🏭</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/patterns/appfactories/" class="resource-link" target="_blank">Application Factory Pattern</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📝</div>
+                                    <a href="https://realpython.com/flask-blueprint/" class="resource-link" target="_blank">Real Python: Flask Blueprints</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=Wfx4YBzg16s" class="resource-link" target="_blank">Flask Application Structure</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xv-a-better-application-structure" class="resource-link" target="_blank">Better Application Structure</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 16 -->
+            <div class="day-card">
+                <div class="day-header" onclick="toggleDay(this)">
+                    <div>
+                        <div class="day-title">Day 16: Testing & Debugging</div>
+                        <div class="day-subtitle">Unit Tests, Integration Tests & Debug Tools</div>
+                    </div>
+                    <button class="toggle-icon">▼</button>
+                </div>
+                <div class="day-content">
+                    <div class="day-inner">
+                        <div class="topic-section">
+                            <h3 class="topic-title">Core Topics</h3>
+                            <div class="subtopics-grid">
+                                <div class="subtopic-item">Flask Test Client</div>
+                                <div class="subtopic-item">pytest Configuration</div>
+                                <div class="subtopic-item">Test Fixtures & Mocking</div>
+                                <div class="subtopic-item">Database Testing</div>
+                                <div class="subtopic-item">API Testing</div>
+                                <div class="subtopic-item">Coverage Reports</div>
+                                <div class="subtopic-item">Debug Toolbar</div>
+                                <div class="subtopic-item">Performance Profiling</div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>tests/conftest.py - Test Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> pytest
+<span class="keyword">from</span> app <span class="keyword">import</span> create_app, db
+<span class="keyword">from</span> app.models <span class="keyword">import</span> User, Post
+<span class="keyword">from</span> config <span class="keyword">import</span> TestingConfig
+
+@pytest.fixture
+<span class="keyword">def</span> <span class="function">app</span>():
+    app = create_app(TestingConfig)
+    <span class="keyword">with</span> app.app_context():
+        db.create_all()
+        <span class="keyword">yield</span> app
+        db.drop_all()
+
+@pytest.fixture
+<span class="keyword">def</span> <span class="function">client</span>(app):
+    <span class="keyword">return</span> app.test_client()
+
+@pytest.fixture
+<span class="keyword">def</span> <span class="function">runner</span>(app):
+    <span class="keyword">return</span> app.test_cli_runner()
+
+@pytest.fixture
+<span class="keyword">def</span> <span class="function">auth</span>(client):
+    <span class="keyword">return</span> AuthActions(client)
+
+<span class="keyword">class</span> <span class="function">AuthActions</span>(object):
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, client):
+        self._client = client
+
+    <span class="keyword">def</span> <span class="function">login</span>(self, username=<span class="string">'test'</span>, password=<span class="string">'test'</span>):
+        <span class="keyword">return</span> self._client.post(
+            <span class="string">'/auth/login'</span>,
+            data={<span class="string">'username'</span>: username, <span class="string">'password'</span>: password}
+        )
+
+    <span class="keyword">def</span> <span class="function">logout</span>(self):
+        <span class="keyword">return</span> self._client.get(<span class="string">'/auth/logout'</span>)</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>tests/test_models.py - Model Tests</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> pytest
+<span class="keyword">from</span> app.models <span class="keyword">import</span> User, Post
+<span class="keyword">from</span> app <span class="keyword">import</span> db
+
+<span class="keyword">def</span> <span class="function">test_password_hashing</span>(app):
+    <span class="keyword">with</span> app.app_context():
+        u = User(username=<span class="string">'susan'</span>)
+        u.set_password(<span class="string">'cat'</span>)
+        <span class="keyword">assert</span> <span class="keyword">not</span> u.check_password(<span class="string">'dog'</span>)
+        <span class="keyword">assert</span> u.check_password(<span class="string">'cat'</span>)
+
+<span class="keyword">def</span> <span class="function">test_avatar</span>(app):
+    <span class="keyword">with</span> app.app_context():
+        u = User(username=<span class="string">'john'</span>, email=<span class="string">'john@example.com'</span>)
+        <span class="keyword">assert</span> u.avatar(128) == (<span class="string">'https://www.gravatar.com/avatar/'</span>
+                                   <span class="string">'d4c74594d841139328695756648b6bd6'</span>
+                                   <span class="string">'?d=identicon&s=128'</span>)
+
+<span class="keyword">def</span> <span class="function">test_follow</span>(app):
+    <span class="keyword">with</span> app.app_context():
+        u1 = User(username=<span class="string">'john'</span>, email=<span class="string">'john@example.com'</span>)
+        u2 = User(username=<span class="string">'susan'</span>, email=<span class="string">'susan@example.com'</span>)
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.commit()
+
+        <span class="keyword">assert</span> u1.followed.all() == []
+        <span class="keyword">assert</span> u1.followers.all() == []
+
+        u1.follow(u2)
+        db.session.commit()
+        <span class="keyword">assert</span> u1.is_following(u2)
+        <span class="keyword">assert</span> u1.followed.count() == 1
+        <span class="keyword">assert</span> u1.followed.first().username == <span class="string">'susan'</span>
+        <span class="keyword">assert</span> u2.followers.count() == 1
+        <span class="keyword">assert</span> u2.followers.first().username == <span class="string">'john'</span>
+
+        u1.unfollow(u2)
+        db.session.commit()
+        <span class="keyword">assert</span> <span class="keyword">not</span> u1.is_following(u2)
+        <span class="keyword">assert</span> u1.followed.count() == 0
+        <span class="keyword">assert</span> u2.followers.count() == 0</code></pre>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span>tests/test_routes.py - Route Tests</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code><span class="keyword">import</span> pytest
+<span class="keyword">from</span> app.models <span class="keyword">import</span> User
+<span class="keyword">from</span> app <span class="keyword">import</span> db
+
+<span class="keyword">def</span> <span class="function">test_login_logout</span>(client, app):
+    <span class="keyword">with</span> app.app_context():
+        <span class="comment"># Create test user</span>
+        user = User(username=<span class="string">'testuser'</span>, email=<span class="string">'test@example.com'</span>)
+        user.set_password(<span class="string">'testpass'</span>)
+        db.session.add(user)
+        db.session.commit()
+
+        <span class="comment"># Test login</span>
+        response = client.post(<span class="string">'/auth/login'</span>, data={
+            <span class="string">'username'</span>: <span class="string">'testuser'</span>,
+            <span class="string">'password'</span>: <span class="string">'testpass'</span>
+        }, follow_redirects=<span class="keyword">True</span>)
+        
+        <span class="keyword">assert</span> response.status_code == 200
+        <span class="keyword">assert</span> b<span class="string">'Home'</span> <span class="keyword">in</span> response.data
+
+        <span class="comment"># Test logout</span>
+        response = client.get(<span class="string">'/auth/logout'</span>, follow_redirects=<span class="keyword">True</span>)
+        <span class="keyword">assert</span> response.status_code == 200
+        <span class="keyword">assert</span> b<span class="string">'Sign In'</span> <span class="keyword">in</span> response.data
+
+<span class="keyword">def</span> <span class="function">test_index_page</span>(client, auth):
+    <span class="comment"># Test redirect to login when not authenticated</span>
+    response = client.get(<span class="string">'/'</span>)
+    <span class="keyword">assert</span> response.status_code == 302
+
+    <span class="comment"># Test access when authenticated</span>
+    auth.login()
+    response = client.get(<span class="string">'/'</span>)
+    <span class="keyword">assert</span> response.status_code == 200
+    <span class="keyword">assert</span> b<span class="string">'Home'</span> <span class="keyword">in</span> response.data
+
+<span class="keyword">def</span> <span class="function">test_api_posts</span>(client, app):
+    <span class="keyword">with</span> app.app_context():
+        <span class="comment"># Create test user and login</span>
+        user = User(username=<span class="string">'testuser'</span>, email=<span class="string">'test@example.com'</span>)
+        user.set_password(<span class="string">'testpass'</span>)
+        db.session.add(user)
+        db.session.commit()
+
+        <span class="comment"># Login</span>
+        client.post(<span class="string">'/auth/login'</span>, data={
+            <span class="string">'username'</span>: <span class="string">'testuser'</span>,
+            <span class="string">'password'</span>: <span class="string">'testpass'</span>
+        })
+
+        <span class="comment"># Test API endpoint</span>
+        response = client.get(<span class="string">'/api/posts'</span>)
+        <span class="keyword">assert</span> response.status_code == 200
+        <span class="keyword">assert</span> response.content_type == <span class="string">'application/json'</span></code></pre>
+                        </div>
+
+                        <div class="resources-section">
+                            <h3 class="resources-title">📚 Essential Resources</h3>
+                            <div class="resources-grid">
+                                <div class="resource-item">
+                                    <div class="resource-icon">🧪</div>
+                                    <a href="https://flask.palletsprojects.com/en/3.1.x/testing/" class="resource-link" target="_blank">Flask Testing Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🐍</div>
+                                    <a href="https://docs.pytest.org/en/7.0.x/" class="resource-link" target="_blank">Pytest Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">📊</div>
+                                    <a href="https://coverage.readthedocs.io/en/7.0.0/" class="resource-link" target="_blank">Coverage.py Documentation</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🎥</div>
+                                    <a href="https://www.youtube.com/watch?v=6tNS--WetLI" class="resource-link" target="_blank">Flask Testing Tutorial</a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon">🔧</div>
+                                    <a href="https://flask-debugtoolbar.readthedocs.io/en/latest/" class="resource-link" target="_blank">Flask Debug Toolbar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        class FlaskLearningTracker {
+            constructor() {
+                this.completedDays = new Set();
+                this.totalDays = 20;
+                this.init();
+            }
+
+            init() {
+                this.loadProgress();
+                this.updateProgressBar();
+                this.setupCopyButtons();
+            }
+
+            loadProgress() {
+                const saved = localStorage.getItem('flaskProgress');
+                if (saved) {
+                    this.completedDays = new Set(JSON.parse(saved));
+                }
+            }
+
+            saveProgress() {
+                localStorage.setItem('flaskProgress', JSON.stringify([...this.completedDays]));
+            }
+
+            markDayComplete(dayIndex) {
+                this.completedDays.add(dayIndex);
+                this.saveProgress();
+                this.updateProgressBar();
+            }
+
+            updateProgressBar() {
+                const progress = (this.completedDays.size / this.totalDays) * 100;
+                const progressFill = document.getElementById('progressFill');
+                const progressPercent = document.getElementById('progressPercent');
+                
+                progressFill.style.width = `${progress}%`;
+                progressPercent.textContent = `${Math.round(progress)}% Complete`;
+            }
+
+            setupCopyButtons() {
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const codeBlock = btn.closest('.code-section').querySelector('code');
+                        navigator.clipboard.writeText(codeBlock.textContent);
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => btn.textContent = 'Copy', 2000);
+                    });
+                });
+            }
+        }
+
+        function toggleDay(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            content.classList.toggle('open');
+            icon.textContent = content.classList.contains('open') ? '▲' : '▼';
+            
+            // Mark day as viewed
+            const dayIndex = Array.from(document.querySelectorAll('.day-card')).indexOf(header.parentElement);
+            tracker.markDayComplete(dayIndex);
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-section').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => button.textContent = 'Copy', 2000);
+            });
+        }
+
+        // Initialize the learning tracker
+        const tracker = new FlaskLearningTracker();
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
